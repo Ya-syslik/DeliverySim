@@ -119,6 +119,49 @@ enum OrderStatus{
     }
 }
 
+interface DeliveryMethod{
+    public int calculateDeliveryPrice(int distance);
+    public int calculateDeliveryTime(int distance);
+}
+
+class StandardDelivery implements DeliveryMethod{
+
+    @Override
+    public int calculateDeliveryPrice(int distance){
+        return (distance * 5);
+    }
+
+    @Override
+    public int calculateDeliveryTime(int distance) {
+        return (distance * 5);
+    }
+}
+
+class ExpressDelivery implements DeliveryMethod{
+    @Override
+    public int calculateDeliveryPrice(int distance){
+        return (distance * 8);
+    }
+
+    @Override
+    public int calculateDeliveryTime(int distance) {
+        return (distance * 3);
+    }
+}
+
+class SelfPickup implements DeliveryMethod{
+    @Override
+    public int calculateDeliveryPrice(int distance){
+        return 0;
+    }
+
+    @Override
+    public int calculateDeliveryTime(int distance) {
+        return 0;
+    }
+}
+
+
 class Order{
     private Client receiver;
     private Courier deliveryPerson;
