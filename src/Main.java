@@ -35,13 +35,20 @@ class Client{
     }
 }
 
+enum CourierStatus{
+    FREE,
+    ON_DELIVERY;
+}
+
 class Courier{
+
     private String name;
     private String number;
-    private String status;
+    private CourierStatus status;
+
 
     Courier(String name,String number,String status){
-        this.status=status;
+        this.status=CourierStatus.FREE;
         this.name=name;
         this.number=number;
     }
@@ -54,7 +61,7 @@ class Courier{
         return number;
     }
 
-    public String getStatus() {
+    public CourierStatus getStatus() {
         return status;
     }
 }
@@ -118,9 +125,15 @@ class Order{
     private String deliveryAddress;
     private List<Item> orderItems=new ArrayList<>();
 
-    Order(){
+    Order(Client receiver,Courier deliveryPerson,int id){
         this.currentStatus=OrderStatus.CREATED;
+
+        this.receiver=receiver;
+        this.deliveryAddress=receiver.getAddress();
+        this.deliveryPerson=deliveryPerson;
+        this.id=id;
     }
+
     public void changeStatus(OrderStatus next){
         if(!currentStatus.canChangeStatusOn(next)){
             throw new IllegalStateException("Can't change status from: "+ currentStatus + " to " + next);
@@ -128,24 +141,17 @@ class Order{
         currentStatus=next;
     }
 
-    public void setId(int id) {
-        this.id = id;
-    }
+
     public int getId() {
         return id;
     }
 
-    public void setDeliveryPerson(Courier deliveryPerson) {
-        this.deliveryPerson = deliveryPerson;
-    }
+
     public Courier getDeliveryPerson() {
         return deliveryPerson;
     }
 
-    public void setReceiver(Client receiver) {
-        this.receiver = receiver;
-        this.deliveryAddress=receiver.getAddress();
-    }
+
     public Client getReceiver() {
         return receiver;
     }
@@ -163,7 +169,7 @@ class Order{
         }
         return items;
     }
-
 }
+
 
 
