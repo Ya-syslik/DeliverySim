@@ -2,9 +2,10 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 
 class  main{
-    public static void main(String[] args){
+    static public void main(String[] args){
 
     }
 }
@@ -71,10 +72,10 @@ class Courier{
 
 class Item {
         private String name;
-        private String price;
+        private int price;
         private int amount;
 
-        Item(String name,String price,int amount){
+        Item(String name,int price,int amount){
             this.name=name;
             this.price=price;
             this.amount=amount;
@@ -84,7 +85,7 @@ class Item {
         return name;
     }
 
-    public String getPrice() {
+    public int getPrice() {
         return price;
     }
 
@@ -163,6 +164,12 @@ class SelfPickup implements DeliveryMethod{
 
 
 class Order{
+    private DeliveryMethod deliveryMethod;
+    private int totalPrice;
+    private int deliveryPrice;
+    private int deliveryTime;
+    private int distance;
+
     private Client receiver;
     private Courier deliveryPerson;
     private OrderStatus currentStatus;
@@ -178,6 +185,14 @@ class Order{
         this.deliveryAddress=receiver.getAddress();
         this.deliveryPerson=deliveryPerson;
         this.id=id;
+
+        distance = ThreadLocalRandom.current().nextInt(1, 21);//random int [1,21]
+    }
+
+    public void setDeliveryMethod(DeliveryMethod deliveryMethod) {
+        this.deliveryMethod = deliveryMethod;
+        deliveryPrice=this.deliveryMethod.calculateDeliveryPrice(distance);
+        deliveryTime=this.deliveryMethod.calculateDeliveryTime(distance);
     }
 
     public void changeStatus(OrderStatus next){
@@ -224,6 +239,14 @@ class Order{
         }
         return items;
     }
+
+    public void calculateTotalPrice(){
+        totalPrice=deliveryPrice;
+        for (Item i:orderItems){
+            deliveryPrice+=i.getPrice();
+        }
+    }
+
 }
 
 
