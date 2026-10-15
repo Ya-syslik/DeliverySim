@@ -1,3 +1,8 @@
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 class  main{
     public static void main(String[] args){
 
@@ -77,4 +82,31 @@ class Item {
         return amount;
     }
 }
+
+enum OrderStatus{
+    CANCELED(makeHashFromArray(new OrderStatus[] {})),
+    DELIVERED(makeHashFromArray(new OrderStatus[] {})),
+    INTRANSIT(makeHashFromArray(new OrderStatus[] {DELIVERED,CANCELED})),
+    PREPARING(makeHashFromArray(new OrderStatus[] {INTRANSIT,CANCELED})),
+    CREATED(makeHashFromArray(new OrderStatus[] {PREPARING,CANCELED}));
+
+    private Set<OrderStatus> StatusesAllowedToChangeIn= new HashSet<>();
+
+    OrderStatus(Set<OrderStatus> StatusesAllowedToChangeIn){
+        this.StatusesAllowedToChangeIn=StatusesAllowedToChangeIn;
+    }
+
+    public boolean canChangeStatusOn(OrderStatus next){
+        return StatusesAllowedToChangeIn.contains(next);
+    }
+
+    static private Set<OrderStatus> makeHashFromArray(OrderStatus[] allowedTransitionsArray){
+        Set<OrderStatus> resultSet=new HashSet<>();
+        for (OrderStatus i:allowedTransitionsArray){
+            resultSet.add(i);
+        }
+        return resultSet;
+    }
+}
+
 
