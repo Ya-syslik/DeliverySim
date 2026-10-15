@@ -1,0 +1,12 @@
+﻿out/
+.idea/
+*.iml
+*.class
+.DS_Store
+@"|Out-File -Encoding utf8 .gitignor
+@"
+out/
+.idea/
+*.iml
+*.class
+.DS_Store
