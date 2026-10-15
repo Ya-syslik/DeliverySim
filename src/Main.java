@@ -109,4 +109,61 @@ enum OrderStatus{
     }
 }
 
+class Order{
+    private Client receiver;
+    private Courier deliveryPerson;
+    private OrderStatus currentStatus;
+
+    private int id;
+    private String deliveryAddress;
+    private List<Item> orderItems=new ArrayList<>();
+
+    Order(){
+        this.currentStatus=OrderStatus.CREATED;
+    }
+    public void changeStatus(OrderStatus next){
+        if(!currentStatus.canChangeStatusOn(next)){
+            throw new IllegalStateException("Can't change status from: "+ currentStatus + " to " + next);
+        }
+        currentStatus=next;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+    public int getId() {
+        return id;
+    }
+
+    public void setDeliveryPerson(Courier deliveryPerson) {
+        this.deliveryPerson = deliveryPerson;
+    }
+    public Courier getDeliveryPerson() {
+        return deliveryPerson;
+    }
+
+    public void setReceiver(Client receiver) {
+        this.receiver = receiver;
+        this.deliveryAddress=receiver.getAddress();
+    }
+    public Client getReceiver() {
+        return receiver;
+    }
+    public String getDeliveryAddress() {
+        return deliveryAddress;
+    }
+
+    public void addItem(Item i){
+        orderItems.add(i);
+    }
+    public List<Item> getOrderItems(){
+        List<Item> items=new ArrayList<>();
+        for (Item i:this.orderItems){
+            items.add(i);
+        }
+        return items;
+    }
+
+}
+
 
