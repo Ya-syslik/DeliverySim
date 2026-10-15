@@ -53,3 +53,28 @@ class Courier{
         return status;
     }
 }
+
+class Item {
+        private String name;
+        private String price;
+        private int amount;
+
+        Item(String name,String price,int amount){
+            this.name=name;
+            this.price=price;
+            this.amount=amount;
+        }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getPrice() {
+        return price;
+    }
+
+    public int getAmount() {
+        return amount;
+    }
+}
+
