@@ -64,6 +64,9 @@ class Courier{
     public CourierStatus getStatus() {
         return status;
     }
+    public void changeStatus(CourierStatus next){
+        this.status=next;
+    }
 }
 
 class Item {
@@ -139,6 +142,15 @@ class Order{
             throw new IllegalStateException("Can't change status from: "+ currentStatus + " to " + next);
         }
         currentStatus=next;
+
+        boolean courierIsFree=(currentStatus==OrderStatus.CANCELED)||(currentStatus==OrderStatus.DELIVERED);
+        if (courierIsFree){
+            deliveryPerson.changeStatus(CourierStatus.FREE);
+        }
+        boolean courierOnDelivery=(currentStatus==OrderStatus.INTRANSIT);
+        if(courierOnDelivery){
+            deliveryPerson.changeStatus(CourierStatus.ON_DELIVERY);
+        }
     }
 
 
