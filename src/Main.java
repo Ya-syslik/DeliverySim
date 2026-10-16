@@ -48,7 +48,7 @@ class Courier{
     private CourierStatus status;
 
 
-    Courier(String name,String number,String status){
+    Courier(String name,String number){
         this.status=CourierStatus.FREE;
         this.name=name;
         this.number=number;
@@ -246,6 +246,38 @@ class Order{
             deliveryPrice+=i.getPrice();
         }
     }
+}
+
+class OrderControlService {
+    private List<Order> orders=new ArrayList<>();
+    private List<Courier> couriers=new ArrayList<>();
+
+    OrderControlService(){
+        couriers.add(new Courier("Vasya","13"));
+        couriers.add(new Courier("Isaac","42"));
+        couriers.add(new Courier("JGun","228"));
+    }
+
+    public void createNewOrder(){
+
+    }
+
+    public void chooseDeliveryMethod(Order orderForChoice){//с назнчаением курьера
+
+    }
+
+    public void showOrderStats(){
+
+    }
+
+    public void changeOrderStatus(Order orderForChange){
+
+    }
+
+    public void showOrderList(){
+
+    }
+
 
 }
 
