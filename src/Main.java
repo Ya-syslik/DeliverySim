@@ -214,12 +214,8 @@ class Order{
         currentStatus=next;
 
         boolean courierIsFree=(currentStatus==OrderStatus.CANCELED)||(currentStatus==OrderStatus.DELIVERED);
-        if (courierIsFree){
+        if (courierIsFree) {
             deliveryPerson.changeStatus(CourierStatus.FREE);
-        }
-        boolean courierOnDelivery=(currentStatus==OrderStatus.INTRANSIT);
-        if(courierOnDelivery){
-            deliveryPerson.changeStatus(CourierStatus.ON_DELIVERY);
         }
     }
 
@@ -280,7 +276,18 @@ class OrderControlService {
     public void chooseDeliveryMethod(DeliveryMethod method){//с назнчаением курьера
         currentOrder.setDeliveryMethod(method);
         if (method.courierIsNecessary()){
-            //назначение курьера из доступных
+            boolean freeCourierHasBeenFound=false;
+            for(Courier c:couriers){
+                if (c.getStatus()==CourierStatus.FREE){
+                    currentOrder.setDeliveryPerson(c);
+                    c.changeStatus(CourierStatus.ON_DELIVERY);
+                    freeCourierHasBeenFound=true;
+                    break;
+                }
+            }
+            if(!freeCourierHasBeenFound){
+                throw new IllegalStateException("All couriers are busy at that moment, pls try later");
+            }
         }
     }
 
