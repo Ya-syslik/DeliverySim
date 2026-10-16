@@ -123,6 +123,7 @@ enum OrderStatus{
 interface DeliveryMethod{
     public int calculateDeliveryPrice(int distance);
     public int calculateDeliveryTime(int distance);
+    public boolean courierIsNecessary();
 }
 
 class StandardDelivery implements DeliveryMethod{
@@ -136,6 +137,9 @@ class StandardDelivery implements DeliveryMethod{
     public int calculateDeliveryTime(int distance) {
         return (distance * 5);
     }
+
+    @Override
+    public boolean courierIsNecessary(){return true;};
 }
 
 class ExpressDelivery implements DeliveryMethod{
@@ -148,6 +152,9 @@ class ExpressDelivery implements DeliveryMethod{
     public int calculateDeliveryTime(int distance) {
         return (distance * 3);
     }
+
+    @Override
+    public boolean courierIsNecessary(){return true;};
 }
 
 class SelfPickup implements DeliveryMethod{
@@ -160,6 +167,9 @@ class SelfPickup implements DeliveryMethod{
     public int calculateDeliveryTime(int distance) {
         return 0;
     }
+
+    @Override
+    public boolean courierIsNecessary(){return false;};
 }
 
 
@@ -178,15 +188,17 @@ class Order{
     private String deliveryAddress;
     private List<Item> orderItems=new ArrayList<>();
 
-    Order(Client receiver,Courier deliveryPerson,int id){
+    Order(Client receiver,int id){
         this.currentStatus=OrderStatus.CREATED;
-
         this.receiver=receiver;
         this.deliveryAddress=receiver.getAddress();
-        this.deliveryPerson=deliveryPerson;
         this.id=id;
 
         distance = ThreadLocalRandom.current().nextInt(1, 21);//random int [1,21]
+    }
+
+    public void setDeliveryPerson(Courier deliveryPerson) {
+        this.deliveryPerson = deliveryPerson;
     }
 
     public void setDeliveryMethod(DeliveryMethod deliveryMethod) {
@@ -251,6 +263,8 @@ class Order{
 class OrderControlService {
     private List<Order> orders=new ArrayList<>();
     private List<Courier> couriers=new ArrayList<>();
+    static private int idCounter=0;
+    private Order currentOrder;
 
     OrderControlService(){
         couriers.add(new Courier("Vasya","13"));
@@ -258,12 +272,16 @@ class OrderControlService {
         couriers.add(new Courier("JGun","228"));
     }
 
-    public void createNewOrder(){
-
+    public void createNewOrder(Client client){
+        idCounter++;
+        orders.add(new Order(client,idCounter));
     }
 
-    public void chooseDeliveryMethod(Order orderForChoice){//с назнчаением курьера
-
+    public void chooseDeliveryMethod(DeliveryMethod method){//с назнчаением курьера
+        currentOrder.setDeliveryMethod(method);
+        if (method.courierIsNecessary()){
+            //назначение курьера из доступных
+        }
     }
 
     public void showOrderStats(){
@@ -278,7 +296,18 @@ class OrderControlService {
 
     }
 
-
+    public void setCurrentOrder(int id) {
+        boolean foundFlag=false;
+        for(Order i:orders){
+            if(id==i.getId()){
+                currentOrder=i;
+                foundFlag=true;
+            }
+        };
+        if(!foundFlag){
+            throw new IllegalMonitorStateException("No such order ID");
+        }
+    }
 }
 
 
