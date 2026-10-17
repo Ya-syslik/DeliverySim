@@ -1,8 +1,10 @@
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.Scanner;
 
 class  main{
     static public void main(String[] args){
@@ -237,6 +239,22 @@ class Order{
         return deliveryAddress;
     }
 
+    public OrderStatus getCurrentStatus() {
+        return currentStatus;
+    }
+
+    public int getTotalPrice() {
+        return totalPrice;
+    }
+
+    public int getDeliveryTime() {
+        return deliveryTime;
+    }
+
+    public DeliveryMethod getDeliveryMethod() {
+        return deliveryMethod;
+    }
+
     public void addItem(Item i){
         orderItems.add(i);
     }
@@ -296,7 +314,30 @@ class OrderControlService {
         currentOrder.changeStatus(nextStatus);
     }
 
-    //метод добавления позиций в текущий заказ с показом меню (додумать)
+    public void showOrderStats(){
+        System.out.println("---------------------------------------------");
+        System.out.println("ID: "+currentOrder.getId());
+        System.out.println("Receiver: "+currentOrder.getReceiver());
+        System.out.println("Delivery address: "+currentOrder.getDeliveryAddress());
+        System.out.println("Courier: "+currentOrder.getDeliveryPerson());
+        System.out.println("Order positions: "+currentOrder.getOrderItems());
+        System.out.println("Price: "+currentOrder.getTotalPrice());
+        System.out.println("Delivery Method: "+currentOrder.getDeliveryMethod());
+        System.out.println("Current status: "+currentOrder.getCurrentStatus());
+        System.out.println("Approximate delivery time: "+currentOrder.getDeliveryTime());
+        System.out.println("---------------------------------------------");
+    }
+
+    public void showAllOrders(){
+        System.out.println("---------------------------------------------");
+        for (Order i:orders){
+            System.out.println("ID: "+i.getId());
+            System.out.println("Current status: "+i.getCurrentStatus());
+            System.out.println("---------------------------------------------"+'\n');
+        }
+    }
+
+
     public void setCurrentOrder(int id) {
         boolean foundFlag=false;
         for(Order i:orders){
@@ -312,20 +353,43 @@ class OrderControlService {
 }
 
 class ConsoleOutService{
+    private Scanner scanner=new Scanner(System.in);
+    private boolean exitFlag=false;
     public void startWorkCycle(){
-
+        while(!exitFlag){
+            showGeneralMenu();
+            switch (setMenuOption()){
+                case "1":
+                    break;
+                case "2":
+                    break;
+                case "3":
+                    break;
+                case "4":
+                    System.out.println("Arrivederci!!");
+                    exitFlag=true;
+                    break;
+                default:
+                    System.out.println("Введено неверное значение!!");
+                    break;
+            };
+        }
     }
 
-    public void setMenuOption(){
-
+    private String setMenuOption(){
+        String menuOption=scanner.nextLine().trim();
+        return menuOption;
     }
 
-    public void showMenu(){
 
+    private void showGeneralMenu(){
+        System.out.println("Главное меню");
+        System.out.println("1.Создать новый заказ");
+        System.out.println("2.Показать мои заказы");
+        System.out.println("3.(Admin) Выбрать заказ для изменения статуса");
+        System.out.println("4.Завершить работу");
     }
 
-    public void showOrderStats(){
 
-    }
 }
 
