@@ -213,8 +213,8 @@ class Order{
         }
         currentStatus=next;
 
-        boolean courierIsFree=(currentStatus==OrderStatus.CANCELED)||(currentStatus==OrderStatus.DELIVERED);
-        if (courierIsFree) {
+        boolean courierBecameFree=(currentStatus==OrderStatus.CANCELED)||(currentStatus==OrderStatus.DELIVERED);
+        if (courierBecameFree) {
             deliveryPerson.changeStatus(CourierStatus.FREE);
         }
     }
@@ -275,6 +275,7 @@ class OrderControlService {
 
     public void chooseDeliveryMethod(DeliveryMethod method){//с назнчаением курьера
         currentOrder.setDeliveryMethod(method);
+
         if (method.courierIsNecessary()){
             boolean freeCourierHasBeenFound=false;
             for(Courier c:couriers){
@@ -291,18 +292,11 @@ class OrderControlService {
         }
     }
 
-    public void showOrderStats(){
-
+    public void changeOrderStatus(OrderStatus nextStatus){
+        currentOrder.changeStatus(nextStatus);
     }
 
-    public void changeOrderStatus(Order orderForChange){
-
-    }
-
-    public void showOrderList(){
-
-    }
-
+    //метод добавления позиций в текущий заказ с показом меню (додумать)
     public void setCurrentOrder(int id) {
         boolean foundFlag=false;
         for(Order i:orders){
@@ -317,5 +311,21 @@ class OrderControlService {
     }
 }
 
+class ConsoleOutService{
+    public void startWorkCycle(){
 
+    }
+
+    public void setMenuOption(){
+
+    }
+
+    public void showMenu(){
+
+    }
+
+    public void showOrderStats(){
+
+    }
+}
 
