@@ -1,4 +1,3 @@
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -19,10 +18,16 @@ class Client{
     private String number;
     private String address;
 
-    Client(String name,String number,String address){
-        this.address=address;
-        this.name=name;
-        this.number=number;
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public void setNumber(String number) {
+        this.number = number;
     }
 
     public String getName() {
@@ -353,9 +358,23 @@ class OrderControlService {
 }
 
 class ConsoleOutService{
+    private Client clientInfo;
+    private String inputMenuOption;
     private Scanner scanner=new Scanner(System.in);
+
     private boolean exitFlag=false;
+
+    private void signUp(){
+        System.out.println("Введите свое имя:");
+        clientInfo.setName(scanner.nextLine().trim());
+        System.out.println("Введите адрес для доставки:");
+        clientInfo.setAddress(scanner.nextLine().trim());
+        System.out.println("Введите свой номер телефона");
+        clientInfo.setNumber(scanner.nextLine().trim());
+    }
+
     public void startWorkCycle(){
+        signUp();
         while(!exitFlag){
             showGeneralMenu();
             switch (setMenuOption()){
@@ -377,8 +396,8 @@ class ConsoleOutService{
     }
 
     private String setMenuOption(){
-        String menuOption=scanner.nextLine().trim();
-        return menuOption;
+        inputMenuOption=scanner.nextLine().trim();
+        return inputMenuOption;
     }
 
 
