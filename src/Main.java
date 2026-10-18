@@ -285,10 +285,19 @@ class OrderControlService {
     static private int idCounter=0;
     private Order currentOrder;
 
-    OrderControlService(){
+
+    private OrderControlService(){
         couriers.add(new Courier("Vasya","13"));
         couriers.add(new Courier("Isaac","42"));
         couriers.add(new Courier("JGun","228"));
+    }
+
+    private static class Holder{
+        private static final OrderControlService INSTANCE=new OrderControlService();
+    }
+
+    public static OrderControlService getInstance(){
+        return Holder.INSTANCE;
     }
 
     public void createNewOrder(Client client){
@@ -358,6 +367,17 @@ class OrderControlService {
 }
 
 class ConsoleOutService{
+
+    private ConsoleOutService(){}
+
+    private static class Holder{
+        private static final ConsoleOutService INSTANCE=new ConsoleOutService();
+    }
+
+    public static ConsoleOutService getInstance(){
+        return ConsoleOutService.Holder.INSTANCE;
+    }
+
     private Client clientInfo;
     private String inputMenuOption;
     private Scanner scanner=new Scanner(System.in);
@@ -369,16 +389,17 @@ class ConsoleOutService{
         clientInfo.setName(scanner.nextLine().trim());
         System.out.println("Введите адрес для доставки:");
         clientInfo.setAddress(scanner.nextLine().trim());
-        System.out.println("Введите свой номер телефона");
+        System.out.println("Введите свой номер телефона:");
         clientInfo.setNumber(scanner.nextLine().trim());
     }
 
-    public void startWorkCycle(){
+    public void startWorkCycle(OrderControlService service){
         signUp();
         while(!exitFlag){
             showGeneralMenu();
             switch (setMenuOption()){
                 case "1":
+
                     break;
                 case "2":
                     break;
