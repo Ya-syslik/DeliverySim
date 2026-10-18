@@ -7,7 +7,9 @@ import java.util.Scanner;
 
 class  main{
     static public void main(String[] args){
-
+        ConsoleOutService consoleOutService=ConsoleOutService.getInstance();
+        OrderControlService orderControlService=OrderControlService.getInstance();
+        consoleOutService.startWorkCycle(orderControlService);
     }
 }
 
@@ -17,6 +19,16 @@ class Client{
     private String name;
     private String number;
     private String address;
+
+    private Client(){}
+
+    private static class  Holder{
+        static final Client INSTANCE=new Client();
+    }
+
+    public static Client getInstance(){
+        return Holder.INSTANCE;
+    }
 
     public void setName(String name) {
         this.name = name;
@@ -378,7 +390,7 @@ class ConsoleOutService{
         return ConsoleOutService.Holder.INSTANCE;
     }
 
-    private Client clientInfo;
+    private Client clientInfo=Client.getInstance();
     private String inputMenuOption;
     private Scanner scanner=new Scanner(System.in);
 
