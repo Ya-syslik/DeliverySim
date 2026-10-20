@@ -345,28 +345,7 @@ class OrderControlService {
         currentOrder.changeStatus(nextStatus);
     }
 
-    public void showOrderStats(){
-        System.out.println("---------------------------------------------");
-        System.out.println("ID: "+currentOrder.getId());
-        System.out.println("Receiver: "+currentOrder.getReceiver());
-        System.out.println("Delivery address: "+currentOrder.getDeliveryAddress());
-        System.out.println("Courier: "+currentOrder.getDeliveryPerson());
-        System.out.println("Order positions: "+currentOrder.getOrderItems());
-        System.out.println("Price: "+currentOrder.getTotalPrice());
-        System.out.println("Delivery Method: "+currentOrder.getDeliveryMethod());
-        System.out.println("Current status: "+currentOrder.getCurrentStatus());
-        System.out.println("Approximate delivery time: "+currentOrder.getDeliveryTime());
-        System.out.println("---------------------------------------------");
-    }
 
-    public void showAllOrders(){
-        System.out.println("---------------------------------------------");
-        for (Order i:orders){
-            System.out.println("ID: "+i.getId());
-            System.out.println("Current status: "+i.getCurrentStatus());
-            System.out.println("---------------------------------------------"+'\n');
-        }
-    }
 
 
     public void setCurrentOrder(int id) {
@@ -421,8 +400,7 @@ class ConsoleOutService{
         clientInfo.setNumber(scanner.nextLine().trim());
     }
 
-    private void editOrder(){
-        clearConsole();
+    private void customerEditOrder(){
         System.out.println("Введите опцию редактирования: ");
         System.out.println("1. Добавить позицию в заказ");
         System.out.println("2. Выбрать способ доставки.");
@@ -456,7 +434,7 @@ class ConsoleOutService{
                 }
                 break;
             case "3":
-                orderControlService.showOrderStats();
+                showOrderStats();
                 break;
             case "4":
                 break;
@@ -466,6 +444,41 @@ class ConsoleOutService{
         }
 
     }
+    private void changeStatusOnInput(OrderStatus changeStatus){
+        try{
+            orderControlService.changeOrderStatus(changeStatus);
+        }catch (IllegalStateException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+    private void adminEditOrder() {
+        System.out.println("Текущий статус: " + orderControlService.getCurrentOrder().getCurrentStatus());
+        System.out.println("Изменить на: ");
+        System.out.println("1.PREPARING ");
+        System.out.println("2.INTRANSIT ");
+        System.out.println("3.DELIVERED ");
+        System.out.println("4.CANCELED ");
+
+        switch (scanner.nextLine().trim()) {
+            case "1":
+                changeStatusOnInput(OrderStatus.PREPARING);
+                break;
+            case "2":
+                changeStatusOnInput(OrderStatus.INTRANSIT);
+                break;
+            case "3":
+                changeStatusOnInput(OrderStatus.DELIVERED);
+                break;
+            case "4":
+                changeStatusOnInput(OrderStatus.CANCELED);
+                break;
+            default:
+                System.out.println("Введи правильный номер,ты же админ!!!");
+                break;
+        }
+       showOrderStats();
+    }
+
 
     public void startWorkCycle(){
         signUp();
@@ -477,16 +490,23 @@ class ConsoleOutService{
                     break;
                 case "2":
                     System.out.println("Выберите заказ:");
-                    orderControlService.showAllOrders();
-                    if(searchOrderByID(scanner.nextLine().trim())) {
-                        editOrder();
+                    showAllOrders();
+                    if(findOrderByID(scanner.nextLine().trim())) {
+                        customerEditOrder();
                     }
                     else{
                         System.out.println("Нет заказа с таким ID");
                     }
                     break;
                 case "3":
-
+                    System.out.println("Выберите заказ:");
+                    showAllOrders();
+                    if(findOrderByID(scanner.nextLine().trim())) {
+                        adminEditOrder();
+                    }
+                    else{
+                        System.out.println("Нет заказа с таким ID");
+                    }
                     break;
                 case "4":
                     System.out.println("Arrivederci!!");
@@ -498,6 +518,8 @@ class ConsoleOutService{
             };
         }
     }
+
+
 
     private String setMenuOption(){
         inputMenuOption=scanner.nextLine().trim();
@@ -524,9 +546,10 @@ class ConsoleOutService{
         System.out.println("0.Вернуться в меню");
     }
 
-// метод выбора заказа с блоком try catch проходим по orderList(orders) и смотрим на ID
 
-    private boolean searchOrderByID(String inputId){
+
+    //сразу устанавливает orderControlService.currentOrder при нахождении
+    private boolean findOrderByID(String inputId){
         int id= Integer.parseInt(inputId);
         boolean correctOrderIDInput=false;
         for (Order i:orderControlService.getOrders()){
@@ -552,10 +575,33 @@ class ConsoleOutService{
         }
         return correctOrderIDInput;
     }
-    public void clearConsole() {
-        System.out.print("\033[H\033[2J");
-        System.out.flush();
+
+    public void showOrderStats(){
+        System.out.println("---------------------------------------------");
+        System.out.println("ID: "+orderControlService.getCurrentOrder().getId());
+        System.out.println("Receiver: "+orderControlService.getCurrentOrder().getReceiver());
+        System.out.println("Delivery address: "+orderControlService.getCurrentOrder().getDeliveryAddress());
+        System.out.println("Courier: "+orderControlService.getCurrentOrder().getDeliveryPerson());
+        System.out.println("Order positions: "+orderControlService.getCurrentOrder().getOrderItems());
+        System.out.println("Price: "+orderControlService.getCurrentOrder().getTotalPrice());
+        System.out.println("Delivery Method: "+orderControlService.getCurrentOrder().getDeliveryMethod());
+        System.out.println("Current status: "+orderControlService.getCurrentOrder().getCurrentStatus());
+        System.out.println("Approximate delivery time: "+orderControlService.getCurrentOrder().getDeliveryTime());
+        System.out.println("---------------------------------------------");
     }
+
+    public void showAllOrders(){
+        System.out.println("---------------------------------------------");
+        for (Order i:orderControlService.getOrders()){
+            System.out.println("ID: "+i.getId());
+            System.out.println("Current status: "+i.getCurrentStatus());
+            System.out.println("---------------------------------------------"+'\n');
+        }
+    }
+//    public void clearConsole() {
+//        System.out.print("\033[H\033[2J");
+//        System.out.flush();
+//    }
 
 }
 class Menu{
