@@ -8,8 +8,6 @@ class  main{
     }
 }
 
-
-
 class Client{
     private String name;
     private String number;
@@ -595,11 +593,12 @@ class ConsoleOutService{
         System.out.println("Delivery address: "+orderControlService.getCurrentOrder().getDeliveryAddress());
         System.out.println("Distance: "+orderControlService.getCurrentOrder().getDistance());
         System.out.println("Current status: "+orderControlService.getCurrentOrder().getCurrentStatus());
+        System.out.println("Order Positions: "+orderControlService.getCurrentOrder().getOrderItems());//***
 
         if(orderControlService.getCurrentOrder().getDeliveryMethod()!=null) {
             System.out.println("Courier: " + orderControlService.getCurrentOrder().getDeliveryPerson().getName());
             System.out.println("Price: " + orderControlService.getCurrentOrder().getTotalPrice());
-            System.out.println("Delivery Method: " + orderControlService.getCurrentOrder().getDeliveryMethod().toString());
+            System.out.println("Delivery Method: " + orderControlService.getCurrentOrder().getDeliveryMethod());//***
             System.out.println("Approximate delivery time: " + orderControlService.getCurrentOrder().getDeliveryTime());
         }
         System.out.println("---------------------------------------------");
@@ -641,4 +640,7 @@ class Menu{
         return menu;
     }
 }
+
+//настроить вывод позиций и метода доставки
+//продолжить дебаг
 
