@@ -1,15 +1,10 @@
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.Scanner;
 
 class  main{
     static public void main(String[] args){
         ConsoleOutService consoleOutService=ConsoleOutService.getInstance();
-        OrderControlService orderControlService=OrderControlService.getInstance();
-        consoleOutService.startWorkCycle(orderControlService);
+        consoleOutService.startWorkCycle();
     }
 }
 
@@ -94,11 +89,14 @@ class Item {
         private int price;
         private int amount;
 
-        Item(String name,int price,int amount){
+        Item(String name,int price){
             this.name=name;
             this.price=price;
-            this.amount=amount;
         }
+
+    public void setAmount(int amount) {
+        this.amount = amount;
+    }
 
     public String getName() {
         return name;
@@ -224,6 +222,7 @@ class Order{
         this.deliveryMethod = deliveryMethod;
         deliveryPrice=this.deliveryMethod.calculateDeliveryPrice(distance);
         deliveryTime=this.deliveryMethod.calculateDeliveryTime(distance);
+        calculateTotalPrice();
     }
 
     public void changeStatus(OrderStatus next){
@@ -274,10 +273,11 @@ class Order{
 
     public void addItem(Item i){
         orderItems.add(i);
+        calculateTotalPrice();
     }
     public List<Item> getOrderItems(){
         List<Item> items=new ArrayList<>();
-        for (Item i:this.orderItems){
+        for (Item i:this.orderItems) {
             items.add(i);
         }
         return items;
@@ -295,6 +295,7 @@ class OrderControlService {
     private List<Order> orders=new ArrayList<>();
     private List<Courier> couriers=new ArrayList<>();
     static private int idCounter=0;
+
     private Order currentOrder;
 
 
@@ -308,6 +309,10 @@ class OrderControlService {
         private static final OrderControlService INSTANCE=new OrderControlService();
     }
 
+    public List<Order> getOrders() {
+        return orders;
+    }
+
     public static OrderControlService getInstance(){
         return Holder.INSTANCE;
     }
@@ -317,7 +322,7 @@ class OrderControlService {
         orders.add(new Order(client,idCounter));
     }
 
-    public void chooseDeliveryMethod(DeliveryMethod method){//с назнчаением курьера
+    public void chooseDeliveryMethod(DeliveryMethod method){//с назначением курьера
         currentOrder.setDeliveryMethod(method);
 
         if (method.courierIsNecessary()){
@@ -376,7 +381,13 @@ class OrderControlService {
             throw new IllegalMonitorStateException("No such order ID");
         }
     }
+
+    public Order getCurrentOrder() {
+        return currentOrder;
+    }
 }
+
+
 
 class ConsoleOutService{
 
@@ -394,6 +405,11 @@ class ConsoleOutService{
     private String inputMenuOption;
     private Scanner scanner=new Scanner(System.in);
 
+    private OrderControlService orderControlService=OrderControlService.getInstance();
+
+    private Menu menu=Menu.getInstance();
+    private Map<Integer,Item> menuInfo= menu.loadMenuFromSomewhere();
+
     private boolean exitFlag=false;
 
     private void signUp(){
@@ -405,17 +421,72 @@ class ConsoleOutService{
         clientInfo.setNumber(scanner.nextLine().trim());
     }
 
-    public void startWorkCycle(OrderControlService service){
+    private void editOrder(){
+        clearConsole();
+        System.out.println("Введите опцию редактирования: ");
+        System.out.println("1. Добавить позицию в заказ");
+        System.out.println("2. Выбрать способ доставки.");
+        System.out.println("3. Показать параметры заказа");
+        System.out.println("3. Вернуться в меню.");
+
+        switch (scanner.nextLine().trim()){
+            case "1":
+                showItemsMenu(menuInfo);
+                if(!addMenuItemByID(scanner.nextLine().trim(),menuInfo)){
+                    System.out.println("Нет товара с таким ID");
+                };
+                break;
+            case "2":
+                System.out.println("1. Курьером");
+                System.out.println("2. Дроном");
+                System.out.println("3. Самовывоз");
+                switch (scanner.nextLine().trim()){
+                    case "1":
+                        orderControlService.chooseDeliveryMethod(new StandardDelivery());
+                        break;
+                    case "2":
+                        orderControlService.chooseDeliveryMethod(new ExpressDelivery());
+                        break;
+                    case "3":
+                        orderControlService.chooseDeliveryMethod(new SelfPickup());
+                        break;
+                    default:
+                        System.out.println("Некорректный номер выбора способа доставки");
+                        break;
+                }
+                break;
+            case "3":
+                orderControlService.showOrderStats();
+                break;
+            case "4":
+                break;
+            default:
+                System.out.println("Неккоректное значение номера опции!");
+                break;
+        }
+
+    }
+
+    public void startWorkCycle(){
         signUp();
         while(!exitFlag){
             showGeneralMenu();
             switch (setMenuOption()){
                 case "1":
-
+                    orderControlService.createNewOrder(clientInfo);
                     break;
                 case "2":
+                    System.out.println("Выберите заказ:");
+                    orderControlService.showAllOrders();
+                    if(searchOrderByID(scanner.nextLine().trim())) {
+                        editOrder();
+                    }
+                    else{
+                        System.out.println("Нет заказа с таким ID");
+                    }
                     break;
                 case "3":
+
                     break;
                 case "4":
                     System.out.println("Arrivederci!!");
@@ -442,6 +513,71 @@ class ConsoleOutService{
         System.out.println("4.Завершить работу");
     }
 
+    private void showItemsMenu(Map<Integer,Item> menuInfo){
+        System.out.println("Выберете позиции:");
+        for (int itemID: menuInfo.keySet()){
+            Item itemInfo =menuInfo.get(itemID);
+            System.out.println(itemID+": ");
+            System.out.println(itemInfo.getName());
+            System.out.println(itemInfo.getPrice()+" тенге");
+        }
+        System.out.println("0.Вернуться в меню");
+    }
 
+// метод выбора заказа с блоком try catch проходим по orderList(orders) и смотрим на ID
+
+    private boolean searchOrderByID(String inputId){
+        int id= Integer.parseInt(inputId);
+        boolean correctOrderIDInput=false;
+        for (Order i:orderControlService.getOrders()){
+            if(i.getId()==id){
+                orderControlService.setCurrentOrder(i.getId());
+                correctOrderIDInput=true;
+            }
+        }
+        return correctOrderIDInput;
+    }
+    private boolean addMenuItemByID(String inputId,Map<Integer,Item> menuInfo){
+
+        int id= Integer.parseInt(inputId);
+        Item foundItem=null;
+
+        boolean correctOrderIDInput=false;
+        for (Integer i:menuInfo.keySet()){
+            if(id==i){
+                foundItem=menuInfo.get(i);
+                orderControlService.getCurrentOrder().addItem(foundItem);
+                correctOrderIDInput=true;
+            }
+        }
+        return correctOrderIDInput;
+    }
+    public void clearConsole() {
+        System.out.print("\033[H\033[2J");
+        System.out.flush();
+    }
+
+}
+class Menu{
+    private Menu(){}
+
+    private static class Holder{
+        private static final Menu INSTANCE=new Menu();
+    }
+
+    public static Menu getInstance(){
+        return Menu.Holder.INSTANCE;
+    }
+    public Map<Integer,Item> loadMenuFromSomewhere() {
+
+        //договоримся что существовала логика по которой,
+        // ID создвались только в натуральных числах и не повторялись
+
+        Map<Integer, Item> menu = new HashMap<>();
+        menu.put(1, new Item("банан", 600));
+        menu.put(2, new Item("пакет гречки", 900));
+        menu.put(3, new Item("батон", 400));
+        return menu;
+    }
 }
 
