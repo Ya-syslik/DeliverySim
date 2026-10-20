@@ -289,6 +289,10 @@ class Order{
             deliveryPrice+=i.getPrice();
         }
     }
+
+    public int getDistance() {
+        return distance;
+    }
 }
 
 class OrderControlService {
@@ -405,7 +409,7 @@ class ConsoleOutService{
         System.out.println("1. Добавить позицию в заказ");
         System.out.println("2. Выбрать способ доставки.");
         System.out.println("3. Показать параметры заказа");
-        System.out.println("3. Вернуться в меню.");
+        System.out.println("4. Вернуться в меню.");
 
         switch (scanner.nextLine().trim()){
             case "1":
@@ -423,7 +427,11 @@ class ConsoleOutService{
                         orderControlService.chooseDeliveryMethod(new StandardDelivery());
                         break;
                     case "2":
-                        orderControlService.chooseDeliveryMethod(new ExpressDelivery());
+                        try{
+                        orderControlService.chooseDeliveryMethod(new ExpressDelivery());}
+                        catch (IllegalStateException e){
+                            System.out.println(e.getMessage());
+                        }
                         break;
                     case "3":
                         orderControlService.chooseDeliveryMethod(new SelfPickup());
@@ -489,7 +497,11 @@ class ConsoleOutService{
                     orderControlService.createNewOrder(clientInfo);
                     break;
                 case "2":
-                    System.out.println("Выберите заказ:");
+                    if (orderControlService.getOrders().isEmpty()){
+                        System.out.println("Сначала создайте заказ!");
+                        break;
+                    }
+                    System.out.println("Выберите заказ (введите его ID):");
                     showAllOrders();
                     if(findOrderByID(scanner.nextLine().trim())) {
                         customerEditOrder();
@@ -579,14 +591,17 @@ class ConsoleOutService{
     public void showOrderStats(){
         System.out.println("---------------------------------------------");
         System.out.println("ID: "+orderControlService.getCurrentOrder().getId());
-        System.out.println("Receiver: "+orderControlService.getCurrentOrder().getReceiver());
+        System.out.println("Receiver: "+orderControlService.getCurrentOrder().getReceiver().getName());
         System.out.println("Delivery address: "+orderControlService.getCurrentOrder().getDeliveryAddress());
-        System.out.println("Courier: "+orderControlService.getCurrentOrder().getDeliveryPerson());
-        System.out.println("Order positions: "+orderControlService.getCurrentOrder().getOrderItems());
-        System.out.println("Price: "+orderControlService.getCurrentOrder().getTotalPrice());
-        System.out.println("Delivery Method: "+orderControlService.getCurrentOrder().getDeliveryMethod());
+        System.out.println("Distance: "+orderControlService.getCurrentOrder().getDistance());
         System.out.println("Current status: "+orderControlService.getCurrentOrder().getCurrentStatus());
-        System.out.println("Approximate delivery time: "+orderControlService.getCurrentOrder().getDeliveryTime());
+
+        if(orderControlService.getCurrentOrder().getDeliveryMethod()!=null) {
+            System.out.println("Courier: " + orderControlService.getCurrentOrder().getDeliveryPerson().getName());
+            System.out.println("Price: " + orderControlService.getCurrentOrder().getTotalPrice());
+            System.out.println("Delivery Method: " + orderControlService.getCurrentOrder().getDeliveryMethod().toString());
+            System.out.println("Approximate delivery time: " + orderControlService.getCurrentOrder().getDeliveryTime());
+        }
         System.out.println("---------------------------------------------");
     }
 
