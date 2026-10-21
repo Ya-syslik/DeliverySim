@@ -270,7 +270,17 @@ class Order{
     }
 
     public void addItem(Item i){
-        orderItems.add(i);
+        boolean listHaveThisItem=false;
+        for(Item j:orderItems){
+            if(i.getName().equals(j.getName())){
+                listHaveThisItem=true;
+                j.setAmount(j.getAmount()+1);
+            }
+        }
+        if(!listHaveThisItem) {
+            i.setAmount(1);
+            orderItems.add(i);
+        }
         calculateTotalPrice();
     }
     public List<Item> getOrderItems(){
@@ -284,12 +294,16 @@ class Order{
     public void calculateTotalPrice(){
         totalPrice=deliveryPrice;
         for (Item i:orderItems){
-            deliveryPrice+=i.getPrice();
+            totalPrice+=i.getPrice()*i.getAmount();
         }
     }
 
     public int getDistance() {
         return distance;
+    }
+
+    public int getDeliveryPrice() {
+        return deliveryPrice;
     }
 }
 
@@ -348,8 +362,6 @@ class OrderControlService {
     }
 
 
-
-
     public void setCurrentOrder(int id) {
         boolean foundFlag=false;
         for(Order i:orders){
@@ -402,6 +414,18 @@ class ConsoleOutService{
         clientInfo.setNumber(scanner.nextLine().trim());
     }
 
+    private void pickingDeliveryMethodWithCourier(DeliveryMethod method){
+        //освобождаем курьера который был на другом методе
+        if(orderControlService.getCurrentOrder().getDeliveryMethod()!=null) {
+            orderControlService.getCurrentOrder().getDeliveryPerson().changeStatus(CourierStatus.FREE);
+        }
+        //выбираем новый метод для доставки
+        try{ orderControlService.chooseDeliveryMethod(new StandardDelivery());}
+        catch (IllegalStateException e){
+            System.out.println(e.getMessage());
+        }
+    }
+
     private void customerEditOrder(){
         System.out.println("Введите опцию редактирования: ");
         System.out.println("1. Добавить позицию в заказ");
@@ -415,6 +439,7 @@ class ConsoleOutService{
                 if(!addMenuItemByID(scanner.nextLine().trim(),menuInfo)){
                     System.out.println("Нет товара с таким ID");
                 };
+                showOrderStats();
                 break;
             case "2":
                 System.out.println("1. Курьером");
@@ -422,14 +447,10 @@ class ConsoleOutService{
                 System.out.println("3. Самовывоз");
                 switch (scanner.nextLine().trim()){
                     case "1":
-                        orderControlService.chooseDeliveryMethod(new StandardDelivery());
+                        pickingDeliveryMethodWithCourier(new StandardDelivery());
                         break;
                     case "2":
-                        try{
-                        orderControlService.chooseDeliveryMethod(new ExpressDelivery());}
-                        catch (IllegalStateException e){
-                            System.out.println(e.getMessage());
-                        }
+                        pickingDeliveryMethodWithCourier(new ExpressDelivery());
                         break;
                     case "3":
                         orderControlService.chooseDeliveryMethod(new SelfPickup());
@@ -438,6 +459,7 @@ class ConsoleOutService{
                         System.out.println("Некорректный номер выбора способа доставки");
                         break;
                 }
+                showOrderStats();
                 break;
             case "3":
                 showOrderStats();
@@ -453,6 +475,7 @@ class ConsoleOutService{
     private void changeStatusOnInput(OrderStatus changeStatus){
         try{
             orderControlService.changeOrderStatus(changeStatus);
+            showOrderStats();
         }catch (IllegalStateException e) {
             System.out.println(e.getMessage());
         }
@@ -482,7 +505,6 @@ class ConsoleOutService{
                 System.out.println("Введи правильный номер,ты же админ!!!");
                 break;
         }
-       showOrderStats();
     }
 
 
@@ -501,21 +523,29 @@ class ConsoleOutService{
                     }
                     System.out.println("Выберите заказ (введите его ID):");
                     showAllOrders();
-                    if(findOrderByID(scanner.nextLine().trim())) {
-                        customerEditOrder();
-                    }
-                    else{
-                        System.out.println("Нет заказа с таким ID");
+                    try {
+                        if(findOrderByID(scanner.nextLine().trim())) {
+                            customerEditOrder();
+                        }
+                        else{
+                            System.out.println("Нет заказа с таким ID");
+                        }
+                    }catch (NumberFormatException e){
+                        System.out.println("Это даже не цифра,попадай по кнопкам пожалуйста!");
                     }
                     break;
                 case "3":
                     System.out.println("Выберите заказ:");
                     showAllOrders();
-                    if(findOrderByID(scanner.nextLine().trim())) {
-                        adminEditOrder();
-                    }
-                    else{
-                        System.out.println("Нет заказа с таким ID");
+                    try {
+                        if(findOrderByID(scanner.nextLine().trim())) {
+                            adminEditOrder();
+                        }
+                        else{
+                            System.out.println("Нет заказа с таким ID");
+                        }
+                    }catch (NumberFormatException e){
+                        System.out.println("Это даже не цифра,попадай по кнопкам пожалуйста!");
                     }
                     break;
                 case "4":
@@ -549,7 +579,7 @@ class ConsoleOutService{
         System.out.println("Выберете позиции:");
         for (int itemID: menuInfo.keySet()){
             Item itemInfo =menuInfo.get(itemID);
-            System.out.println(itemID+": ");
+            System.out.print(itemID+": ");
             System.out.println(itemInfo.getName());
             System.out.println(itemInfo.getPrice()+" тенге");
         }
@@ -593,13 +623,25 @@ class ConsoleOutService{
         System.out.println("Delivery address: "+orderControlService.getCurrentOrder().getDeliveryAddress());
         System.out.println("Distance: "+orderControlService.getCurrentOrder().getDistance());
         System.out.println("Current status: "+orderControlService.getCurrentOrder().getCurrentStatus());
-        System.out.println("Order Positions: "+orderControlService.getCurrentOrder().getOrderItems());//***
+
+        System.out.println("Order Positions: ");
+        System.out.println("-^-");
+       for(Item i :orderControlService.getCurrentOrder().getOrderItems()){
+           System.out.println(i.getName());
+           System.out.println("Price: " + i.getPrice());
+           System.out.println("Amount: " + i.getAmount());
+       }
+        System.out.println("-^-");
 
         if(orderControlService.getCurrentOrder().getDeliveryMethod()!=null) {
-            System.out.println("Courier: " + orderControlService.getCurrentOrder().getDeliveryPerson().getName());
-            System.out.println("Price: " + orderControlService.getCurrentOrder().getTotalPrice());
-            System.out.println("Delivery Method: " + orderControlService.getCurrentOrder().getDeliveryMethod());//***
+            if(!(orderControlService.getCurrentOrder().getDeliveryMethod() instanceof SelfPickup)) {
+                System.out.println("Courier: " + orderControlService.getCurrentOrder().getDeliveryPerson().getName());
+                System.out.println("Courier number: " + orderControlService.getCurrentOrder().getDeliveryPerson().getNumber());
+            }
+            System.out.println("Delivery price: " + orderControlService.getCurrentOrder().getDeliveryPrice());
+            System.out.println("Delivery Method: " + orderControlService.getCurrentOrder().getDeliveryMethod().getClass().getSimpleName());
             System.out.println("Approximate delivery time: " + orderControlService.getCurrentOrder().getDeliveryTime());
+            System.out.println("Total price: " + orderControlService.getCurrentOrder().getTotalPrice());
         }
         System.out.println("---------------------------------------------");
     }
@@ -641,6 +683,4 @@ class Menu{
     }
 }
 
-//настроить вывод позиций и метода доставки
 //продолжить дебаг
-
