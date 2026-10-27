@@ -335,6 +335,11 @@ class OrderControlService {
     }
 
     public void chooseDeliveryMethod(DeliveryMethod method){//с назначением курьера
+
+        if (currentOrder.getDeliveryMethod() != null && currentOrder.getDeliveryPerson() != null) {
+            currentOrder.getDeliveryPerson().changeStatus(CourierStatus.FREE);
+        }
+
         currentOrder.setDeliveryMethod(method);
 
         if (method.courierIsNecessary()){
@@ -417,17 +422,6 @@ class ConsoleOutService{
         clientInfo.setNumber(scanner.nextLine().trim());
     }
 
-    private void pickingDeliveryMethodWithCourier(DeliveryMethod method){
-        //освобождаем курьера который был на другом методе
-        if(orderControlService.getCurrentOrder().getDeliveryMethod()!=null) {
-            orderControlService.getCurrentOrder().getDeliveryPerson().changeStatus(CourierStatus.FREE);
-        }
-        //выбираем новый метод для доставки
-        try{ orderControlService.chooseDeliveryMethod(new StandardDelivery());}
-        catch (IllegalStateException e){
-            System.out.println(e.getMessage());
-        }
-    }
 
     private void customerEditOrder(){
         System.out.println("Введите опцию редактирования: ");
@@ -450,10 +444,12 @@ class ConsoleOutService{
                 System.out.println("3. Самовывоз");
                 switch (scanner.nextLine().trim()){
                     case "1":
-                        pickingDeliveryMethodWithCourier(new StandardDelivery());
+                        try { orderControlService.chooseDeliveryMethod(new StandardDelivery()); }
+                        catch (IllegalStateException e) { System.out.println(e.getMessage()); }
                         break;
                     case "2":
-                        pickingDeliveryMethodWithCourier(new ExpressDelivery());
+                        try { orderControlService.chooseDeliveryMethod(new ExpressDelivery()); }
+                        catch (IllegalStateException e) { System.out.println(e.getMessage()); }
                         break;
                     case "3":
                         orderControlService.chooseDeliveryMethod(new SelfPickup());
