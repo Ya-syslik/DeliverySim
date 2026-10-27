@@ -229,10 +229,6 @@ class Order{
         }
         currentStatus=next;
 
-        boolean courierBecameFree=(currentStatus==OrderStatus.CANCELED)||(currentStatus==OrderStatus.DELIVERED);
-        if (courierBecameFree) {
-            deliveryPerson.changeStatus(CourierStatus.FREE);
-        }
     }
 
 
@@ -358,7 +354,14 @@ class OrderControlService {
     }
 
     public void changeOrderStatus(OrderStatus nextStatus){
+
         currentOrder.changeStatus(nextStatus);
+
+        boolean OrderIsFinished =(nextStatus==OrderStatus.CANCELED)||(nextStatus==OrderStatus.DELIVERED);
+
+        if (OrderIsFinished && currentOrder.getDeliveryPerson()!=null) {
+            currentOrder.getDeliveryPerson().changeStatus(CourierStatus.FREE);
+        }
     }
 
 
@@ -683,4 +686,4 @@ class Menu{
     }
 }
 
-//продолжить дебаг
+
