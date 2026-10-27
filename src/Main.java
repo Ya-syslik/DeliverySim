@@ -591,12 +591,10 @@ class ConsoleOutService{
     }
 
 
-
     private String setMenuOption(){
         inputMenuOption=scanner.nextLine().trim();
         return inputMenuOption;
     }
-
 
     private void showGeneralMenu(){
         System.out.println("Главное меню");
@@ -623,14 +621,14 @@ class ConsoleOutService{
         System.out.println("ID: "+orderControlService.getCurrentOrder().getId());
         System.out.println("Receiver: "+orderControlService.getCurrentOrder().getReceiver().getName());
         System.out.println("Delivery address: "+orderControlService.getCurrentOrder().getDeliveryAddress());
-        System.out.println("Distance: "+orderControlService.getCurrentOrder().getDistance());
+        System.out.println("Distance: "+orderControlService.getCurrentOrder().getDistance()+" км");
         System.out.println("Current status: "+orderControlService.getCurrentOrder().getCurrentStatus());
 
         System.out.println("Order Positions: ");
         System.out.println("-^-");
        for(Item i :orderControlService.getCurrentOrder().getOrderItems()){
            System.out.println(i.getName());
-           System.out.println("Price: " + i.getPrice());
+           System.out.println("Price: " + i.getPrice() + " тг.");
            System.out.println("Amount: " + i.getAmount());
        }
         System.out.println("-^-");
@@ -640,10 +638,10 @@ class ConsoleOutService{
                 System.out.println("Courier: " + orderControlService.getCurrentOrder().getDeliveryPerson().getName());
                 System.out.println("Courier number: " + orderControlService.getCurrentOrder().getDeliveryPerson().getNumber());
             }
-            System.out.println("Delivery price: " + orderControlService.getCurrentOrder().getDeliveryPrice());
+            System.out.println("Delivery price: " + orderControlService.getCurrentOrder().getDeliveryPrice() + " тг.");
             System.out.println("Delivery Method: " + orderControlService.getCurrentOrder().getDeliveryMethod().getClass().getSimpleName());
-            System.out.println("Approximate delivery time: " + orderControlService.getCurrentOrder().getDeliveryTime());
-            System.out.println("Total price: " + orderControlService.getCurrentOrder().getTotalPrice());
+            System.out.println("Approximate delivery time: " + orderControlService.getCurrentOrder().getDeliveryTime() + " сек.");
+            System.out.println("Total price: " + orderControlService.getCurrentOrder().getTotalPrice() + " тг.");
         }
         System.out.println("---------------------------------------------");
     }
@@ -656,10 +654,6 @@ class ConsoleOutService{
             System.out.println("---------------------------------------------"+'\n');
         }
     }
-//    public void clearConsole() {
-//        System.out.print("\033[H\033[2J");
-//        System.out.flush();
-//    }
 
 }
 class Menu{
