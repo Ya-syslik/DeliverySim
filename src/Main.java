@@ -386,6 +386,30 @@ class OrderControlService {
     public Order getCurrentOrder() {
         return currentOrder;
     }
+
+    public boolean findOrderByID(int id) {
+        boolean correctOrderIDInput = false;
+        for (Order i : orders) {
+            if (i.getId() == id) {
+                this.setCurrentOrder(i.getId());
+                correctOrderIDInput = true;
+            }
+        }
+        return correctOrderIDInput;
+    }
+
+    public boolean addMenuItemByID(int id, Map<Integer, Item> menuInfo) {
+        Item foundItem = null;
+        boolean correctOrderIDInput = false;
+        for (Integer i : menuInfo.keySet()) {
+            if (id == i) {
+                foundItem = menuInfo.get(i);
+                currentOrder.addItem(foundItem);
+                correctOrderIDInput = true;
+            }
+        }
+        return correctOrderIDInput;
+    }
 }
 
 
@@ -433,9 +457,17 @@ class ConsoleOutService{
         switch (scanner.nextLine().trim()){
             case "1":
                 showItemsMenu(menuInfo);
-                if(!addMenuItemByID(scanner.nextLine().trim(),menuInfo)){
+                try {
+                    // Парсим ввод пользователя в число
+                    int itemId = Integer.parseInt(scanner.nextLine().trim());
+
+                    if (!orderControlService.addMenuItemByID(itemId, menuInfo)) {
+                        System.out.println("Нет товара с таким ID");
+                    }
+                } catch (NumberFormatException e) {
+                    // Если вместо ID ввели буквы
                     System.out.println("Нет товара с таким ID");
-                };
+                }
                 showOrderStats();
                 break;
             case "2":
@@ -523,13 +555,13 @@ class ConsoleOutService{
                     System.out.println("Выберите заказ (введите его ID):");
                     showAllOrders();
                     try {
-                        if(findOrderByID(scanner.nextLine().trim())) {
+                        int id = Integer.parseInt(scanner.nextLine().trim());
+                        if (orderControlService.findOrderByID(id)) {
                             customerEditOrder();
-                        }
-                        else{
+                        } else {
                             System.out.println("Нет заказа с таким ID");
                         }
-                    }catch (NumberFormatException e){
+                    } catch (NumberFormatException e) {
                         System.out.println("Это даже не цифра,попадай по кнопкам пожалуйста!");
                     }
                     break;
@@ -537,13 +569,13 @@ class ConsoleOutService{
                     System.out.println("Выберите заказ:");
                     showAllOrders();
                     try {
-                        if(findOrderByID(scanner.nextLine().trim())) {
+                        int id = Integer.parseInt(scanner.nextLine().trim());
+                        if (orderControlService.findOrderByID(id)) {
                             adminEditOrder();
-                        }
-                        else{
+                        } else {
                             System.out.println("Нет заказа с таким ID");
                         }
-                    }catch (NumberFormatException e){
+                    } catch (NumberFormatException e) {
                         System.out.println("Это даже не цифра,попадай по кнопкам пожалуйста!");
                     }
                     break;
@@ -585,35 +617,6 @@ class ConsoleOutService{
         System.out.println("0.Вернуться в меню");
     }
 
-
-
-    //сразу устанавливает orderControlService.currentOrder при нахождении
-    private boolean findOrderByID(String inputId){
-        int id= Integer.parseInt(inputId);
-        boolean correctOrderIDInput=false;
-        for (Order i:orderControlService.getOrders()){
-            if(i.getId()==id){
-                orderControlService.setCurrentOrder(i.getId());
-                correctOrderIDInput=true;
-            }
-        }
-        return correctOrderIDInput;
-    }
-    private boolean addMenuItemByID(String inputId,Map<Integer,Item> menuInfo){
-
-        int id= Integer.parseInt(inputId);
-        Item foundItem=null;
-
-        boolean correctOrderIDInput=false;
-        for (Integer i:menuInfo.keySet()){
-            if(id==i){
-                foundItem=menuInfo.get(i);
-                orderControlService.getCurrentOrder().addItem(foundItem);
-                correctOrderIDInput=true;
-            }
-        }
-        return correctOrderIDInput;
-    }
 
     public void showOrderStats(){
         System.out.println("---------------------------------------------");
